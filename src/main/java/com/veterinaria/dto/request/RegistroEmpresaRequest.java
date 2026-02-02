@@ -17,6 +17,10 @@ public record RegistroEmpresaRequest(
         @NotBlank
         String nombreComercial,
         @NotBlank
+        String ruc,
+        @NotBlank
+        String razonSocial,
+        @NotBlank
         String telefono,
         @NotBlank
         String pais,

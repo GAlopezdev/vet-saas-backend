@@ -1,5 +1,6 @@
 package com.veterinaria.model.entity;
 
+import com.veterinaria.model.enums.EstadoRegistroEmpresa;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,6 +62,19 @@ public class Empresa {
     @Column(precision = 11, scale = 8)
     private BigDecimal longitud;
 
+    @Column(name = "ruc", length = 11, unique = true)
+    private String ruc;
+
+    @Column(name = "razon_social", length = 200)
+    private String razonSocial;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_registro", length = 20)
+    private EstadoRegistroEmpresa estadoRegistro;
+
+    @Column(name = "verificado_at")
+    private LocalDateTime verificadoAt;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -71,13 +85,18 @@ public class Empresa {
 
     public Empresa() {}
 
-    public Empresa(Usuario usuario, TipoEmpresa tipo, String nombreComercial, String telefono, String pais, String ciudad, String direccion) {
+    public Empresa(Usuario usuario, TipoEmpresa tipo, String nombreComercial,
+                   String ruc, String razonSocial, String telefono,
+                   String pais, String ciudad, String direccion) {
         this.usuario = usuario;
         this.tipoEmpresa = tipo;
         this.nombreComercial = nombreComercial;
+        this.ruc = ruc;
+        this.razonSocial = razonSocial;
         this.telefono = telefono;
         this.pais = pais;
         this.ciudad = ciudad;
         this.direccion = direccion;
+        this.estadoRegistro = EstadoRegistroEmpresa.PENDIENTE;
     }
 }

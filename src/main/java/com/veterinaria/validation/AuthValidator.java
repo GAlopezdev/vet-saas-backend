@@ -1,5 +1,6 @@
 package com.veterinaria.validation;
 
+import com.veterinaria.repository.EmpresaRepository;
 import com.veterinaria.repository.TipoEmpresaRepository;
 import com.veterinaria.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ public class AuthValidator {
 
     private final UsuarioRepository usuarioRepository;
     private final TipoEmpresaRepository tipoEmpresaRepository;
+    private final EmpresaRepository empresaRepository;
 
     public void validarCorreoUnico(String correo) {
         if (usuarioRepository.existsByCorreo(correo)) {
@@ -27,6 +29,12 @@ public class AuthValidator {
     public void validarTipoEmpresaExiste(Long tipoEmpresaId) {
         if (!tipoEmpresaRepository.existsById(tipoEmpresaId)) {
             throw new RuntimeException("El tipo de empresa no existe");
+        }
+    }
+
+    public void validarRucUnico(String ruc) {
+        if (empresaRepository.existsByRuc(ruc)) {
+            throw new RuntimeException("Este RUC ya se encuentra registrado.");
         }
     }
 

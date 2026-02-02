@@ -75,6 +75,7 @@ public class AuthServiceImpl implements AuthService {
     public RegistroResponse registrarEmpresa(RegistroEmpresaRequest request) {
         authValidator.validarCorreoUnico(request.correo());
         authValidator.validarTipoEmpresaExiste(request.idTipoEmpresa());
+        authValidator.validarRucUnico(request.ruc());
 
         TipoEmpresa tipo = tipoEmpresaRepository.getReferenceById(request.idTipoEmpresa());
 
@@ -88,16 +89,19 @@ public class AuthServiceImpl implements AuthService {
                 nuevoUsuario,
                 tipo,
                 request.nombreComercial(),
+                request.ruc(),
+                request.razonSocial(),
                 request.telefono(),
                 request.pais(),
                 request.ciudad(),
-                request.direccion());
+                request.direccion()
+        );
         empresaRepository.save(nuevaEmpresa);
 
         prepararVerificacionYEnviarEmail(nuevoUsuario);
 
         return new RegistroResponse(
-                "Registro exitoso. Por favor, verifica tu bandeja de entrada para activar tu cuenta.",
+                "Registro exitoso. Verifique su email.",
                 nuevoUsuario.getCorreo()
         );
     }
