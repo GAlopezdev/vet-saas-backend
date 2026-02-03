@@ -199,6 +199,24 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.save(vToken);
 
-        emailService.sendRegistrationEmail(usuario, vToken.getToken());
+        String subject;
+        String templateName;
+
+        switch (usuario.getRol()) {
+            case EMPRESA -> {
+                subject = "Validación de Cuenta Empresarial - Vet-SaaS";
+                templateName = "registro-empresa";
+            }
+            case VETERINARIO -> {
+                subject = "Verificación de Perfil Profesional - Vet-SaaS";
+                templateName = "registro-veterinario";
+            }
+            default -> {
+                subject = "¡Bienvenido a Vet-SaaS! Activa tu cuenta";
+                templateName = "registro-cliente";
+            }
+        }
+
+        emailService.sendRegistrationEmail(usuario, vToken.getToken(), subject, templateName);
     }
 }
