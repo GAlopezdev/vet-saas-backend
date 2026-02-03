@@ -1,7 +1,7 @@
 package com.veterinaria.model.enums;
 
-public enum EstadoRegistroEmpresa {
+public enum EstadoRegistro {
     PENDIENTE,
-    APROBADO,
+    VERIFICADO,
     RECHAZADO
 }

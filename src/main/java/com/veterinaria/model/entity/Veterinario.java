@@ -1,8 +1,11 @@
 package com.veterinaria.model.entity;
 
+import com.veterinaria.model.enums.EstadoRegistro;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,14 +29,32 @@ public class Veterinario {
     private Integer aniosExperiencia;
     private String fotoPerfil;
 
+    @Column(name = "numero_colegiatura", unique = true)
+    private String numeroColegiatura;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_registro")
+    private EstadoRegistro estadoRegistro;
+
+    @Column(name = "verificado_at")
+    private LocalDateTime verificadoAt;
+
+    @ManyToOne
+    @JoinColumn(name = "verificado_por")
+    private Usuario verificadoPor;
+
     public Veterinario() {}
 
-    public Veterinario(String especialidad, String telefono, String apema, String apepa, String nombres, Usuario usuario) {
-        this.especialidad = especialidad;
-        this.telefono = telefono;
-        this.apema = apema;
-        this.apepa = apepa;
-        this.nombres = nombres;
+    public Veterinario(Usuario usuario, String nombres, String apepa, String apema,
+                       String telefono, String especialidad, Integer aniosExperiencia, String numeroColegiatura) {
         this.usuario = usuario;
+        this.nombres = nombres;
+        this.apepa = apepa;
+        this.apema = apema;
+        this.telefono = telefono;
+        this.especialidad = especialidad;
+        this.aniosExperiencia = aniosExperiencia;
+        this.numeroColegiatura = numeroColegiatura;
+        this.estadoRegistro = EstadoRegistro.PENDIENTE;
     }
 }

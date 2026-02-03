@@ -50,7 +50,7 @@ public class Usuario implements UserDetails {
     private LocalDateTime updatedAt;
 
     public Usuario() {
-        this.estado = true;
+        this.estado = false;
         this.emailVerificado = false;
     }
 
@@ -58,8 +58,8 @@ public class Usuario implements UserDetails {
         this.correo = correo;
         this.contrasenia = contrasenia;
         this.rol = rol;
-        this.estado = true;
         this.emailVerificado = false;
+        this.estado = (rol == UserRol.CLIENTE);
     }
 
     @Override
