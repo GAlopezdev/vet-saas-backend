@@ -58,6 +58,7 @@ public class AdminServiceImpl implements AdminService {
         vet.setVerificadoPor(admin);
 
         vet.getUsuario().setEstado(true);
+        vet.getUsuario().setEmailVerificado(true);
 
         veterinarioRepository.save(vet);
     }
@@ -86,6 +87,7 @@ public class AdminServiceImpl implements AdminService {
         empresa.setVerificadoPor(admin);
 
         empresa.getUsuario().setEstado(true);
+        empresa.getUsuario().setEmailVerificado(true);
 
         empresaRepository.save(empresa);
     }
