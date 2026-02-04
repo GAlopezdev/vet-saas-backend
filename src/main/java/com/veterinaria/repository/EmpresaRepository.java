@@ -25,4 +25,5 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     @Query("SELECT e FROM Empresa e")
     Page<Empresa> findAllEmpresas(Pageable pageable);
 
+    boolean existsByNombreComercialAndIdEmpresaNot(String nombre, Long id);
 }
