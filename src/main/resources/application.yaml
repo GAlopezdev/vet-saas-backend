@@ -49,3 +49,13 @@ jwt:
 
 app:
   frontend-url: ${FRONTEND_URL}
+
+api:
+  peru:
+    base-url: https://dniruc.apisperu.com/api/v1
+    token: ${API_PERU_TOKEN}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

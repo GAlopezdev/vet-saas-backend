@@ -21,5 +21,7 @@ public record RegistroVeterinarioRequest(
         String especialidad,
         @NotNull
         @PositiveOrZero
-        Integer aniosExperiencia
+        Integer aniosExperiencia,
+        @NotBlank
+        String numeroColegiatura
 ) {}

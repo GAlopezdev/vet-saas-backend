@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Empresarial en Revisión</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f7f9; font-family:Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7f9; padding:30px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+                <tr>
+                    <td align="center" style="background-color:#2C3E50; padding:32px;">
+                        <span style="color:#ffffff; font-size:28px; font-weight:700; letter-spacing:0.5px;">Vet-SaaS</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:40px 40px 30px 40px; color:#2f3e4e;">
+                        <h1 style="margin:0 0 16px 0; font-size:24px; font-weight:600;">
+                            <span th:text="'¡Hola, ' + ${nombre} + '!'"></span>
+                        </h1>
+                        <p style="margin:0 0 24px 0; font-size:16px; line-height:1.6;">
+                            Gracias por registrar tu empresa en <strong>Vet-SaaS</strong>. Tu solicitud ha ingresado a nuestra cola de validación.
+                        </p>
+                        <p style="margin:0 0 24px 0; font-size:16px; line-height:1.6; border-left: 4px solid #2C3E50; padding-left: 15px;">
+                            <strong>Proceso de Auditoría:</strong> Nuestro equipo administrativo verificará los datos de tu empresa y el RUC proporcionado. Te enviaremos un correo electrónico en cuanto el acceso a tu panel de gestión haya sido habilitado.
+                        </p>
+                        <p style="margin:30px 0 0 0; font-size:14px; color:#6b7b8c; text-align: center;">
+                            Este proceso suele tardar entre 24 y 48 horas hábiles.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color:#f4f7f9; padding:24px 40px; text-align:center;">
+                        <p style="margin:0; font-size:12px; color:#8a97a6; line-height:1.5;">
+                            Si el equipo técnico necesita documentación extra, te contactaremos por esta vía.<br>
+                            Si no registraste una empresa, por favor ignora este correo.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

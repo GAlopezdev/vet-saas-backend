@@ -1,0 +1,7 @@
+ALTER TABLE empresas 
+ADD COLUMN ruc VARCHAR(11) UNIQUE,
+ADD COLUMN razon_social VARCHAR(200),
+ADD COLUMN estado_registro VARCHAR(20) DEFAULT 'PENDIENTE' 
+    CHECK (estado_registro IN ('PENDIENTE', 'VERIFICADO', 'RECHAZADO')),
+ADD COLUMN verificado_at TIMESTAMP,
+ADD COLUMN ficha_ruc_url VARCHAR(255);

@@ -47,10 +47,11 @@ public class AuthServiceImpl implements AuthService {
     public RegistroResponse registrarCliente(RegistroClienteRequest request) {
         authValidator.validarCorreoUnico(request.correo());
 
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setCorreo(request.correo());
-        nuevoUsuario.setContrasenia(passwordEncoder.encode(request.contrasenia()));
-        nuevoUsuario.setRol(UserRol.CLIENTE);
+        Usuario nuevoUsuario = new Usuario(
+                request.correo(),
+                passwordEncoder.encode(request.contrasenia()),
+                UserRol.CLIENTE
+        );
         usuarioRepository.save(nuevoUsuario);
 
         PerfilCliente nuevoPerfil = new PerfilCliente(
@@ -75,29 +76,34 @@ public class AuthServiceImpl implements AuthService {
     public RegistroResponse registrarEmpresa(RegistroEmpresaRequest request) {
         authValidator.validarCorreoUnico(request.correo());
         authValidator.validarTipoEmpresaExiste(request.idTipoEmpresa());
+        authValidator.validarRucUnico(request.ruc());
 
         TipoEmpresa tipo = tipoEmpresaRepository.getReferenceById(request.idTipoEmpresa());
 
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setCorreo(request.correo());
-        nuevoUsuario.setContrasenia(passwordEncoder.encode(request.contrasenia()));
-        nuevoUsuario.setRol(UserRol.EMPRESA);
+        Usuario nuevoUsuario = new Usuario(
+                request.correo(),
+                passwordEncoder.encode(request.contrasenia()),
+                UserRol.EMPRESA
+        );
         usuarioRepository.save(nuevoUsuario);
 
         Empresa nuevaEmpresa = new Empresa(
                 nuevoUsuario,
                 tipo,
                 request.nombreComercial(),
+                request.ruc(),
+                request.razonSocial(),
                 request.telefono(),
                 request.pais(),
                 request.ciudad(),
-                request.direccion());
+                request.direccion()
+        );
         empresaRepository.save(nuevaEmpresa);
 
         prepararVerificacionYEnviarEmail(nuevoUsuario);
 
         return new RegistroResponse(
-                "Registro exitoso. Por favor, verifica tu bandeja de entrada para activar tu cuenta.",
+                "Registro exitoso. Se le enviará un correo para la verificación de su cuenta.",
                 nuevoUsuario.getCorreo()
         );
     }
@@ -107,25 +113,29 @@ public class AuthServiceImpl implements AuthService {
     public RegistroResponse registrarVeterinario(RegistroVeterinarioRequest request) {
         authValidator.validarCorreoUnico(request.correo());
 
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setCorreo(request.correo());
-        nuevoUsuario.setContrasenia(passwordEncoder.encode(request.contrasenia()));
-        nuevoUsuario.setRol(UserRol.VETERINARIO);
+        Usuario nuevoUsuario = new Usuario(
+                request.correo(),
+                passwordEncoder.encode(request.contrasenia()),
+                UserRol.VETERINARIO
+        );
         usuarioRepository.save(nuevoUsuario);
 
         Veterinario nuevoVeterinario = new Veterinario(
-                request.especialidad(),
-                request.telefono(),
-                request.apema(),
-                request.apepa(),
+                nuevoUsuario,
                 request.nombres(),
-                nuevoUsuario);
+                request.apepa(),
+                request.apema(),
+                request.telefono(),
+                request.especialidad(),
+                request.aniosExperiencia(),
+                request.numeroColegiatura()
+        );
         veterinarioRepository.save(nuevoVeterinario);
 
         prepararVerificacionYEnviarEmail(nuevoUsuario);
 
         return new RegistroResponse(
-                "Registro exitoso. Por favor, verifica tu bandeja de entrada para activar tu cuenta.",
+                "Registro exitoso. Un administrador revisará su colegiatura para activar su cuenta.",
                 nuevoUsuario.getCorreo()
         );
     }
@@ -189,6 +199,24 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.save(vToken);
 
-        emailService.sendRegistrationEmail(usuario, vToken.getToken());
+        String subject;
+        String templateName;
+
+        switch (usuario.getRol()) {
+            case EMPRESA -> {
+                subject = "Validación de Cuenta Empresarial - Vet-SaaS";
+                templateName = "registro-empresa";
+            }
+            case VETERINARIO -> {
+                subject = "Verificación de Perfil Profesional - Vet-SaaS";
+                templateName = "registro-veterinario";
+            }
+            default -> {
+                subject = "¡Bienvenido a Vet-SaaS! Activa tu cuenta";
+                templateName = "registro-cliente";
+            }
+        }
+
+        emailService.sendRegistrationEmail(usuario, vToken.getToken(), subject, templateName);
     }
 }
