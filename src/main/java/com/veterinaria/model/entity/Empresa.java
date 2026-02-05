@@ -21,11 +21,11 @@ public class Empresa {
     @Column(name = "id_empresa")
     private Long idEmpresa;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_empresa_id", nullable = false)
     private TipoEmpresa tipoEmpresa;
 
@@ -79,7 +79,7 @@ public class Empresa {
     @Column(name = "verificado_at")
     private LocalDateTime verificadoAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verificado_por")
     private Usuario verificadoPor;
 

@@ -30,7 +30,7 @@ public class ServicioEmpresa {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
 
-    private boolean activo;
+    private Boolean activo = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
