@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface HorarioEmpresaRepository extends JpaRepository<HorarioEmpresa, Long> {
 
-    List<HorarioEmpresa> findByEmpresaIdEmpresaOrderByDiaSemanaAsc(Long idEmpresa);
+    List<HorarioEmpresa> findAllByEmpresaIdEmpresa(Long idEmpresa);
+    void deleteByEmpresaIdEmpresa(Long idEmpresa);
 
 }

@@ -2,6 +2,8 @@ package com.veterinaria.service.impl;
 
 import com.veterinaria.dto.request.EmpresaProfileRequest;
 import com.veterinaria.dto.request.HorarioRequest;
+import com.veterinaria.dto.response.HorarioResponse;
+import com.veterinaria.mapper.HorarioEmpresaMapper;
 import com.veterinaria.model.entity.Empresa;
 import com.veterinaria.model.entity.HorarioEmpresa;
 import com.veterinaria.repository.EmpresaRepository;
@@ -23,49 +25,67 @@ public class EmpresaServiceImpl implements EmpresaService {
     private final EmpresaRepository empresaRepo;
     private final HorarioEmpresaRepository horarioRepo;
     private final EmpresaValidator validator;
+    private final HorarioEmpresaMapper horarioMapper;
 
-    private String getCurrentUserEmail() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+    private Empresa getAuthenticatedEmpresa() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return empresaRepo.findByUsuarioCorreo(email)
+                .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
     }
 
+    @Override
     @Transactional
-    public void actualizarPerfilCompleto(Long idUsuario, EmpresaProfileRequest request) {
-        Empresa empresa = empresaRepo.findByUsuarioCorreo(getCurrentUserEmail())
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
+    public List<HorarioResponse> actualizarHorarios(List<HorarioRequest> requests) {
+        Empresa empresa = getAuthenticatedEmpresa();
 
-        if (validator.existeNombreComercial(request.nombreComercial(), empresa.getIdEmpresa())) {
-            throw new IllegalArgumentException("El nombre comercial ya está en uso por otra empresa.");
-        }
+        validator.validarDiasDuplicados(requests);
+        requests.forEach(validator::validarCoherenciaHoras);
 
-        validator.validarDiasDuplicados(request.horarios());
+        List<HorarioEmpresa> horariosActuales = horarioRepo.findAllByEmpresaIdEmpresa(empresa.getIdEmpresa());
 
-        empresa.setNombreComercial(request.nombreComercial());
-        empresa.setTelefono(request.telefono());
-        empresa.setDireccion(request.direccion());
-        empresa.setDescripcion(request.descripcion());
+        List<HorarioEmpresa> horariosParaGuardar = requests.stream().map(dto -> {
+            HorarioEmpresa entidad = horariosActuales.stream()
+                    .filter(h -> h.getDiaSemana().equals(dto.diaSemana()))
+                    .findFirst()
+                    .orElse(new HorarioEmpresa());
 
-        List<HorarioEmpresa> actuales = horarioRepo.findByEmpresaIdEmpresaOrderByDiaSemanaAsc(empresa.getIdEmpresa());
-        horarioRepo.deleteAll(actuales);
-
-        List<HorarioEmpresa> nuevosHorarios = request.horarios().stream().map(h -> {
-            validator.validarCoherenciaHoras(h);
-
-            HorarioEmpresa horario = new HorarioEmpresa();
-            horario.setEmpresa(empresa);
-            horario.setDiaSemana(h.diaSemana());
-
-            if (h.horaApertura() != null && !h.horaApertura().isBlank()) {
-                horario.setHoraApertura(LocalTime.parse(h.horaApertura()));
-            }
-            if (h.horaCierre() != null && !h.horaCierre().isBlank()) {
-                horario.setHoraCierre(LocalTime.parse(h.horaCierre()));
+            if (entidad.getIdHorario() == null) {
+                entidad.setEmpresa(empresa);
+                entidad.setDiaSemana(dto.diaSemana());
             }
 
-            horario.setEstaCerrado(h.estaCerrado());
-            return horario;
+            entidad.setEstaCerrado(dto.estaCerrado());
+            if (dto.estaCerrado()) {
+                entidad.setHoraApertura(null);
+                entidad.setHoraCierre(null);
+            } else {
+                entidad.setHoraApertura(LocalTime.parse(dto.horaApertura()));
+                entidad.setHoraCierre(LocalTime.parse(dto.horaCierre()));
+            }
+
+            return entidad;
         }).toList();
 
-        horarioRepo.saveAll(nuevosHorarios);
-        empresaRepo.save(empresa);
+        List<Integer> diasQueVienen = requests.stream().map(HorarioRequest::diaSemana).toList();
+        List<HorarioEmpresa> paraEliminar = horariosActuales.stream()
+                .filter(h -> !diasQueVienen.contains(h.getDiaSemana()))
+                .toList();
+
+        if (!paraEliminar.isEmpty()) {
+            horarioRepo.deleteAll(paraEliminar);
+        }
+
+        return horarioRepo.saveAll(horariosParaGuardar).stream()
+                .map(horarioMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HorarioResponse> listarMisHorarios() {
+        Empresa empresa = getAuthenticatedEmpresa();
+        return horarioRepo.findAllByEmpresaIdEmpresa(empresa.getIdEmpresa()).stream()
+                .map(h -> new HorarioResponse(h.getIdHorario(), h.getDiaSemana(), h.getHoraApertura(), h.getHoraCierre(), h.isEstaCerrado()))
+                .toList();
     }
 }
