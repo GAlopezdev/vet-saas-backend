@@ -8,7 +8,7 @@ public record ProductoResponseDTO(
         Integer stock,
         String imagenUrl,
         String estado,
-        String nombreVendedor,
+        String correoVendedor,
         String nombreSubcategoria
 ) {
 }
