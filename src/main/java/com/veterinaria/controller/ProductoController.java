@@ -10,9 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -22,10 +23,27 @@ public class ProductoController {
 
     private final ProductoService productoService;
 
-    @PostMapping
-    public ResponseEntity<ProductoResponseDTO> crearProducto(@Valid @RequestBody ProductoRequestDTO productoRequestDTO) {
-        ProductoResponseDTO nuevoProducto = productoService.crearProducto(productoRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
+    @PostMapping(value = "", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<ProductoResponseDTO> crearProducto(
+            @RequestPart("producto") @Valid ProductoRequestDTO requestDTO,
+            @RequestPart("imagen") MultipartFile imagen) {
+
+        return new ResponseEntity<>(productoService.crearProducto(requestDTO, imagen), HttpStatus.CREATED);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductoResponseDTO> actualizarProducto(
+            @PathVariable Long id,
+            @RequestPart("producto") @Valid ProductoRequestDTO requestDTO,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+
+        return ResponseEntity.ok(productoService.actualizarProducto(id, requestDTO, imagen));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
+        productoService.eliminarProducto(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

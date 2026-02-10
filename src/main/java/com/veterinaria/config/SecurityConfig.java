@@ -4,6 +4,7 @@ import com.veterinaria.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -42,6 +43,10 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/empresas/**").hasRole("EMPRESA")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/productos").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/productos/**").hasAnyRole("EMPRESA", "VETERINARIO")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasAnyRole("EMPRESA", "VETERINARIO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasAnyRole("EMPRESA", "VETERINARIO")
 
                         .anyRequest().authenticated()
                 )

@@ -20,7 +20,7 @@ public record ProductoRequestDTO (
         BigDecimal precio,
 
         @NotNull(message = "El stock es obligatorio")
-        @Min(value = 0, message = "El stock no puede ser negativo")
+        @Min(value = 1, message = "El stock mínimo debe ser 1")
         Integer stock,
 
         String imagenUrl,
