@@ -1,0 +1,1 @@
+ALTER TABLE productos ADD CONSTRAINT check_stock_positivo CHECK (stock >= 0);

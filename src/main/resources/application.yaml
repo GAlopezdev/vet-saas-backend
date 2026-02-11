@@ -41,6 +41,8 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
     org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 jwt:
   secret: ${JWT_SECRET}
@@ -49,6 +51,12 @@ jwt:
 
 app:
   frontend-url: ${FRONTEND_URL}
+  public-url: "https://nelly-unrestorative-ronald.ngrok-free.dev"
+  security:
+    cors:
+      allowed-origins:
+        - "http://localhost:5173"
+        - "https://nelly-unrestorative-ronald.ngrok-free.dev"
 
 api:
   peru:
@@ -59,3 +67,15 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
+
+mercadopago:
+  access-token: ${ACCESS_TOKEN}
+  # URL de notificación (Webhook) - Donde MP envía eventos
+  # IMPORTANTE: En desarrollo usar ngrok, en producción tu dominio
+  # Ejemplo ngrok: https://abc123.ngrok.io/api/pagos/webhook
+  notification-url: ${MP_NOTIFICATION_URL:http://localhost:8080/api/pagos/webhook}
+  webhook-secret: ${MP_WEBHOOK_SECRET}
+  back-urls:
+    success: "${app.public-url}/api/pagos/exito"
+    failure: "${app.public-url}/api/pagos/fallo"
+    pending: "${app.public-url}/api/pagos/pendiente"
