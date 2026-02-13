@@ -2,6 +2,8 @@ package com.veterinaria.controller;
 
 import com.veterinaria.dto.mercadopago.CreateOrderRequest;
 import com.veterinaria.dto.mercadopago.PaymentResponse;
+import com.veterinaria.dto.request.UpdateEstadoOrdenRequest;
+import com.veterinaria.dto.response.OrdenSeguimientoResponse;
 import com.veterinaria.model.entity.Order;
 import com.veterinaria.service.impl.OrderService;
 import jakarta.validation.Valid;
@@ -38,5 +40,28 @@ public class OrderController {
     public ResponseEntity<Order> getOrder(@PathVariable Long orderId) {
         // Implementar según necesidad
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/mis-pedidos/{usuarioId}")
+    public ResponseEntity<List<OrdenSeguimientoResponse>> obtenerMisPedidos(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) Order.OrderStatus estado) {
+
+        return ResponseEntity.ok(orderService.obtenerMisPedidos(usuarioId, estado));
+    }
+
+    // GET /api/ordenes/seguimiento/456
+    @GetMapping("/seguimiento/{idOrden}")
+    public ResponseEntity<OrdenSeguimientoResponse> obtenerSeguimiento(@PathVariable Long idOrden) {
+        return ResponseEntity.ok(orderService.obtenerDetalleSeguimiento(idOrden));
+    }
+
+    // PATCH /api/ordenes/456/estado
+    @PatchMapping("/{idOrden}/estado")
+    public ResponseEntity<OrdenSeguimientoResponse> actualizarEstado(
+            @PathVariable Long idOrden,
+            @Valid @RequestBody UpdateEstadoOrdenRequest request) {
+
+        return ResponseEntity.ok(orderService.actualizarEstado(idOrden, request));
     }
 }

@@ -4,12 +4,15 @@ import com.mercadopago.resources.preference.Preference;
 import com.veterinaria.dto.mercadopago.CartItemRequest;
 import com.veterinaria.dto.mercadopago.CreateOrderRequest;
 import com.veterinaria.dto.mercadopago.PaymentResponse;
+import com.veterinaria.dto.request.UpdateEstadoOrdenRequest;
+import com.veterinaria.dto.response.OrdenSeguimientoResponse;
 import com.veterinaria.model.entity.Order;
 import com.veterinaria.model.entity.OrderItem;
 import com.veterinaria.model.entity.Producto;
 import com.veterinaria.model.enums.OrderStatus;
 import com.veterinaria.repository.OrderRepository;
 import com.veterinaria.repository.ProductoRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +131,49 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Order> findByEstado(OrderStatus estado) {
         return orderRepository.findByEstadoOrden(estado);
+    }
+
+    public List<OrdenSeguimientoResponse> obtenerMisPedidos(Long usuarioId, Order.OrderStatus estado) {
+        List<Order> ordenes;
+        if (estado != null) {
+            // Usando el nuevo nombre del método
+            ordenes = orderRepository.findByUsuarioIdAndEstadoOrdenOrderByCreatedAtDesc(usuarioId, estado);
+        } else {
+            // Usando el nuevo nombre del método
+            ordenes = orderRepository.findByUsuarioIdOrderByCreatedAtDesc(usuarioId);
+        }
+        return ordenes.stream().map(this::mapToResponse).toList();
+    }
+
+    @Transactional
+    public OrdenSeguimientoResponse actualizarEstado(Long idOrden, UpdateEstadoOrdenRequest request) {
+        Order orden = orderRepository.findById(idOrden)
+                .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
+
+        // El trigger de tu BD (Flyway V10) se encargará de setear fecha_pago si el estado pasa a PAGADO.
+        orden.setEstadoOrden(request.nuevoEstado());
+
+        Order ordenGuardada = orderRepository.save(orden);
+        return mapToResponse(ordenGuardada);
+    }
+
+    @Transactional(readOnly = true)
+    public OrdenSeguimientoResponse obtenerDetalleSeguimiento(Long idOrden) {
+        Order orden = orderRepository.findById(idOrden)
+                .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
+        return mapToResponse(orden);
+    }
+
+    // Nota: Si ya tienes un Mapper (ej. MapStruct en la carpeta mapper), usa eso en lugar de este método manual.
+    private OrdenSeguimientoResponse mapToResponse(Order orden) {
+        return new OrdenSeguimientoResponse(
+                orden.getIdOrden(),
+                orden.getCreatedAt(), // AQUÍ: Cambiamos getFecha() por getCreatedAt()
+                orden.getFechaPago(),
+                orden.getTotal(),
+                orden.getEstadoOrden(), // Nota: asegúrate de que el DTO reciba un OrderStatus y no EstadoOrden
+                orden.getPaymentIdMp()
+        );
     }
 
     // Verifica que exista stock suficiente antes de crear la orden.
