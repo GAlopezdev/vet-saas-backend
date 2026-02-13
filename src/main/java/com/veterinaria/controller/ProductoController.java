@@ -57,4 +57,9 @@ public class ProductoController {
             @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(productoService.obtenerMisProductos(pageable));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductoResponseDTO> obtenerProductoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.obtenerPorId(id));
+    }
 }

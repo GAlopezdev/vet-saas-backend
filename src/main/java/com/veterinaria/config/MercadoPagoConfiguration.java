@@ -2,34 +2,25 @@ package com.veterinaria.config;
 
 import com.mercadopago.MercadoPagoConfig;
 import jakarta.annotation.PostConstruct;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@Getter
+@Slf4j
 public class MercadoPagoConfiguration {
 
-    @Value("${mercadopago.access-token}")
+    @Value("${mp.access-token}")
     private String accessToken;
-
-    @Value("${mercadopago.webhook-secret:}")
-    private String webhookSecret;
-
-    @Value("${mercadopago.back-urls.success}")
-    private String successUrl;
-
-    @Value("${mercadopago.back-urls.failure}")
-    private String failureUrl;
-
-    @Value("${mercadopago.back-urls.pending}")
-    private String pendingUrl;
-
-    @Value("${mercadopago.notification-url}")
-    private String notificationUrl;
 
     @PostConstruct
     public void init() {
-        MercadoPagoConfig.setAccessToken(accessToken);
+        try {
+            MercadoPagoConfig.setAccessToken(accessToken);
+            log.info("✅ Mercado Pago configurado correctamente");
+        } catch (Exception e) {
+            log.error("❌ Error configurando Mercado Pago: {}", e.getMessage());
+            throw new RuntimeException("Error al configurar Mercado Pago", e);
+        }
     }
 }

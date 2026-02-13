@@ -119,4 +119,18 @@ public class ProductoServiceImpl implements ProductoService {
         return productoRepository.findByUsuario_IdUsuario(vendedor.getIdUsuario(), pageable)
                 .map(productoMapper::toDto);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductoResponseDTO obtenerPorId(Long id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
+
+        // Opcional: Validar que el producto no esté INACTIVO
+        if ("INACTIVO".equals(producto.getEstado())) {
+            throw new ResourceNotFoundException("El producto no está disponible");
+        }
+
+        return productoMapper.toDto(producto);
+    }
 }

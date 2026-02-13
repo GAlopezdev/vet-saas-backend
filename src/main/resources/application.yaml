@@ -68,14 +68,10 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
 
-mercadopago:
-  access-token: ${ACCESS_TOKEN}
-  # URL de notificación (Webhook) - Donde MP envía eventos
-  # IMPORTANTE: En desarrollo usar ngrok, en producción tu dominio
-  # Ejemplo ngrok: https://abc123.ngrok.io/api/pagos/webhook
-  notification-url: ${MP_NOTIFICATION_URL:http://localhost:8080/api/pagos/webhook}
-  webhook-secret: ${MP_WEBHOOK_SECRET}
+mp:
+  access-token: ${MP_ACCESS_TOKEN}
+  webhook-url: ${app.public-url}/api/payments/webhook
   back-urls:
-    success: "${app.public-url}/api/pagos/exito"
-    failure: "${app.public-url}/api/pagos/fallo"
-    pending: "${app.public-url}/api/pagos/pendiente"
+    success: "${app.public-url}/api/payments/exito"
+    failure: "${app.public-url}/api/payments/fallo"
+    pending: "${app.public-url}/api/payments/pendiente"

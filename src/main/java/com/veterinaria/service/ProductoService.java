@@ -17,4 +17,6 @@ public interface ProductoService {
     Page<ProductoResponseDTO> obtenerTodos(Pageable pageable);
 
     Page<ProductoResponseDTO> obtenerMisProductos(Pageable pageable);
+
+    ProductoResponseDTO obtenerPorId(Long id);
 }

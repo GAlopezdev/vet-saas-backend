@@ -2,6 +2,7 @@ package com.veterinaria.config;
 
 import com.veterinaria.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,7 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -29,30 +30,35 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authProvider;
 
+    // Inyectamos la lista desde el YAML
+    @Value("${app.security.cors.allowed-origins:}")
+    private List<String> allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(authRequests -> authRequests
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/consultas/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/v1/tipos-empresa/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        // Rutas Públicas (Auth y Documentación)
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/consultas/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/error", "/").permitAll()
 
+                        .requestMatchers("/api/payments/**").permitAll() // Webhook de Mercado Pago debe ser público
+                        .requestMatchers("/api/orders/**").hasAnyRole("CLIENTE", "EMPRESA", "VETERINARIO")
+                        // Admin
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/empresas/**").hasRole("EMPRESA")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/productos").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/productos/**").hasAnyRole("EMPRESA", "VETERINARIO")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasAnyRole("EMPRESA", "VETERINARIO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasAnyRole("EMPRESA", "VETERINARIO")
+
+                        // Productos
+                        .requestMatchers(HttpMethod.GET,"/api/v1/productos/**").permitAll() // Ver productos suele ser público
+                        .requestMatchers(HttpMethod.POST, "/api/v1/productos/**").hasAnyRole("CLIENTE", "EMPRESA", "VETERINARIO")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasAnyRole("CLIENTE","EMPRESA", "VETERINARIO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasAnyRole("CLIENTE","EMPRESA", "VETERINARIO")
 
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(
-                        sessionManager ->
-                        sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
@@ -61,11 +67,22 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://tu-app-veterinaria.com"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://localhost:4200",
+                "https://nelly-unrestorative-ronald.ngrok-free.dev"
+        ));
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "ngrok-skip-browser-warning" // Importante para probar con navegador y Ngrok
+        ));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(1800L);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
